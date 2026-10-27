@@ -7,9 +7,9 @@ def chunk_text(text, chunk_size=500, overlap=50):
         start += chunk_size - overlap
     return chunks
 
-# Load both your notes files as one knowledge base
+# Load notes files as one knowledge base
 all_text = ""
-for fname in ["data/day1_notes.txt", "data/day2_notes.txt"]:
+for fname in ["data/day1_notes.md", "data/day2_notes.md"]:
     with open(fname) as f:
         all_text += f.read() + "\n\n"
 
@@ -35,9 +35,51 @@ def retrieve(query, chunks, embeddings, model, top_k=3):
     top_idx = np.argsort(scores)[::-1][:top_k]
     return [(chunks[i], scores[i]) for i in top_idx]
 
-# Test with questions you know the answer to from your own notes
+# Test retrieval
 results = retrieve("What does the --reload flag do?", chunks, embeddings, model)
 for chunk, score in results:
     print(f"Score: {score:.3f}")
     print(chunk[:150])
     print("---")
+
+
+import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def generate_answer(query, chunks, embeddings, model):
+    results = retrieve(query, chunks, embeddings, model, top_k=3)
+    context = "\n\n".join([chunk for chunk, score in results])
+
+    prompt = f"""Answer the question using ONLY the context below. If the context doesn't contain the answer, say "I don't know."
+
+Context:
+{context}
+
+Question: {query}"""
+
+    response = requests.post(
+        url="https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+        },
+        json={
+            "model": "openrouter/free",
+            "messages": [{"role": "user", "content": prompt}]
+        }
+    )
+    return response.json()["choices"][0]["message"]["content"]
+
+# Test 1: question with answer in notes
+print("\n--- Test: answer exists ---")
+print(generate_answer("What does the --reload flag do?", chunks, embeddings, model))
+
+# Test 2: question with NO answer in notes
+print("\n--- Test: answer does NOT exist ---")
+print(generate_answer("What is Docker?", chunks, embeddings, model))
+
+# Test 3: your own question
+print("\n--- Test: your own question ---")
+print(generate_answer("What does tool calling let the model do?", chunks, embeddings, model))

@@ -1,4 +1,3 @@
-from sentence_transformers import SentenceTransformer
 import numpy as np
 import requests
 import os
@@ -6,19 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-_model = SentenceTransformer("all-MiniLM-L6-v2")
 _chunks = []
 _embeddings = None
-
-def load_knowledge_base(file_paths):
-    global _chunks, _embeddings
-    all_text = ""
-    for fname in file_paths:
-        with open(fname) as f:
-            all_text += f.read() + "\n\n"
-    _chunks = chunk_text(all_text)
-    _embeddings = _model.encode(_chunks)
-    return len(_chunks)
 
 def chunk_text(text, chunk_size=500, overlap=50):
     chunks = []
@@ -29,8 +17,29 @@ def chunk_text(text, chunk_size=500, overlap=50):
         start += chunk_size - overlap
     return chunks
 
+def get_embedding(text):
+    response = requests.post(
+        url="https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction",
+        headers={"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"},
+        json={"inputs": text}
+    )
+    print("STATUS:", response.status_code)
+    print("RESPONSE TYPE:", type(response.json()))
+    data = response.json()
+   
+
+def load_knowledge_base(file_paths):
+    global _chunks, _embeddings
+    all_text = ""
+    for fname in file_paths:
+        with open(fname) as f:
+            all_text += f.read() + "\n\n"
+    _chunks = chunk_text(all_text)
+    _embeddings = np.array([get_embedding(c) for c in _chunks])
+    return len(_chunks)
+
 def retrieve(query, top_k=3):
-    query_emb = _model.encode([query])[0]
+    query_emb = np.array(get_embedding(query))
     scores = np.dot(_embeddings, query_emb) / (
         np.linalg.norm(_embeddings, axis=1) * np.linalg.norm(query_emb)
     )
@@ -57,7 +66,4 @@ Question: {query}"""
         }
     )
     answer = response.json()["choices"][0]["message"]["content"]
-    return {
-        "answer": answer,
-        "sources": results  # yeh "sources with answer" wala part hai
-    }
+    return {"answer": answer, "sources": results}

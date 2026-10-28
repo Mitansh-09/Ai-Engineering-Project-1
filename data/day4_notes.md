@@ -34,6 +34,13 @@ This confirms the instruction prevents hallucination — without it,
 the model would likely answer Docker questions from its own general
 knowledge, which defeats the point of RAG (answering from MY data).
 
+## Chunk size experiment
+Changed chunk_size from 500 to 300. Chunk count went from 11 to 19.
+Retrieval scores shifted slightly (0.358 → 0.321 for the same query),
+but final answers stayed correct. With only 2 small notes files as the
+knowledge base, the effect was minor — a bigger effect would likely
+show on a larger, more varied document set.
+
 ## Key takeaway
 Retrieval decides WHAT information the LLM sees.
 Generation decides HOW that information gets turned into an answer.

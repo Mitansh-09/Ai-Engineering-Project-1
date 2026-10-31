@@ -23,10 +23,7 @@ def get_embedding(text):
         headers={"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"},
         json={"inputs": text}
     )
-    print("STATUS:", response.status_code)
-    print("RESPONSE TYPE:", type(response.json()))
-    data = response.json()
-   
+    return response.json()
 
 def load_knowledge_base(file_paths):
     global _chunks, _embeddings
@@ -65,5 +62,7 @@ Question: {query}"""
             "messages": [{"role": "user", "content": prompt}]
         }
     )
+    print("STATUS:", response.status_code)
+    print("RESPONSE:", response.json())
     answer = response.json()["choices"][0]["message"]["content"]
     return {"answer": answer, "sources": results}

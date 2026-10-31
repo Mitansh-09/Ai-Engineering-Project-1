@@ -1,0 +1,82 @@
+[
+  {
+    "question": "What does the --reload flag do in uvicorn?",
+    "expected_answer": "Restarts the server automatically when code changes, useful during development"
+  },
+  {
+    "question": "What is FastAPI built on top of?",
+    "expected_answer": "Starlette and Pydantic"
+  },
+  {
+    "question": "What happens if someone passes text instead of a number to a path parameter typed as int?",
+    "expected_answer": "FastAPI automatically returns a validation error"
+  },
+  {
+    "question": "What does a POST request do compared to PUT and DELETE?",
+    "expected_answer": "POST creates a new resource, PUT updates/replaces an existing resource, DELETE removes a resource"
+  },
+  {
+    "question": "Does the LLM remember past messages automatically between API calls?",
+    "expected_answer": "No, every call is independent. You must resend the full message history to have a conversation."
+  },
+  {
+    "question": "What is a weakness of asking an LLM for structured JSON output?",
+    "expected_answer": "The model can add extra text around the JSON or return invalid JSON, so you need error handling"
+  },
+  {
+    "question": "Does the LLM itself execute the function during tool calling?",
+    "expected_answer": "No, the model only decides when and with what arguments to call a tool. The developer's code runs the actual function."
+  },
+  {
+    "question": "What is an agent, according to the notes?",
+    "expected_answer": "An LLM that can repeatedly call tools, read their results, and decide the next action instead of just answering once"
+  },
+  {
+    "question": "What is the purpose of overlap in chunking?",
+    "expected_answer": "So that information near the boundary of one chunk isn't lost, it appears partially in both chunks"
+  },
+  {
+    "question": "What model was used to generate embeddings?",
+    "expected_answer": "all-MiniLM-L6-v2 from sentence-transformers, producing 384-number vectors"
+  },
+  {
+    "question": "What does a cosine similarity score close to 1 mean?",
+    "expected_answer": "Very similar meaning between the two vectors"
+  },
+  {
+    "question": "Why can embeddings find relevant text even when the wording is different from the question?",
+    "expected_answer": "Embeddings capture meaning, not exact words, unlike keyword search like Ctrl+F"
+  },
+  {
+    "question": "What are the two stages of RAG?",
+    "expected_answer": "Indexing stage (done once: chunk, embed, store) and retrieval stage (done per question: embed query, compare, return top matches)"
+  },
+  {
+    "question": "Why is the knowledge base loaded once at FastAPI startup instead of per request?",
+    "expected_answer": "Because loading the embedding model and encoding chunks is slow, so doing it once avoids repeating that work on every request"
+  },
+  {
+    "question": "What do the sources in the API response let the caller see?",
+    "expected_answer": "Why the model gave that answer, which chunks were used and their similarity scores"
+  },
+  {
+    "question": "Why did deployment run out of memory on Render's free tier?",
+    "expected_answer": "sentence-transformers plus torch and transformers needs gigabytes of memory, more than the 512MB free tier limit"
+  },
+  {
+    "question": "What is the free tier memory limit on Render?",
+    "expected_answer": "512MB"
+  },
+  {
+    "question": "What permission did the HuggingFace token need that it was missing?",
+    "expected_answer": "Make calls to Inference Providers"
+  },
+  {
+    "question": "Why did OpenRouter embeddings fail?",
+    "expected_answer": "Insufficient credits, OpenRouter embeddings are not free even though some chat models are"
+  },
+  {
+    "question": "What is the new HuggingFace inference URL structure after the old one was retired?",
+    "expected_answer": "router.huggingface.co/hf-inference/models/{model}/pipeline/feature-extraction"
+  }
+]

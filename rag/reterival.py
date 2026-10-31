@@ -27,13 +27,15 @@ print(embeddings.shape)
 
 import numpy as np
 
-def retrieve(query, chunks, embeddings, model, top_k=3):
-    query_emb = model.encode([query])[0]
-    scores = np.dot(embeddings, query_emb) / (
-        np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query_emb)
+def retrieve(query, top_k=3):
+    query_emb = np.array(get_embedding(query))
+    print("embeddings type:", type(_embeddings), "shape:", getattr(_embeddings, "shape", "NO SHAPE"))
+    print("query_emb type:", type(query_emb), "shape:", getattr(query_emb, "shape", "NO SHAPE"))
+    scores = np.dot(_embeddings, query_emb) / (
+        np.linalg.norm(_embeddings, axis=1) * np.linalg.norm(query_emb)
     )
     top_idx = np.argsort(scores)[::-1][:top_k]
-    return [(chunks[i], scores[i]) for i in top_idx]
+    return [{"text": _chunks[i], "score": float(scores[i])} for i in top_idx]
 
 # Test retrieval
 results = retrieve("What does the --reload flag do?", chunks, embeddings, model)

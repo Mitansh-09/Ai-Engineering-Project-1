@@ -62,7 +62,41 @@ Question: {query}"""
             "messages": [{"role": "user", "content": prompt}]
         }
     )
-    print("STATUS:", response.status_code)
-    print("RESPONSE:", response.json())
-    answer = response.json()["choices"][0]["message"]["content"]
+    data = response.json()
+    if "choices" not in data:
+        return {"answer": f"ERROR: {data.get('error', {}).get('message', 'unknown error')}", "sources": results}
+    answer = data["choices"][0]["message"]["content"]
     return {"answer": answer, "sources": results}
+
+
+def rewrite_query(query, n=3):
+    prompt = f"""Generate {n} different ways to ask this same question, to help with document search. Return ONLY the questions, one per line, no numbering.
+
+Original question: {query}"""
+
+    response = requests.post(
+        url="https://openrouter.ai/api/v1/chat/completions",
+        headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
+        json={
+            "model": "openrouter/free",
+            "messages": [{"role": "user", "content": prompt}]
+        }
+    )
+    data = response.json()
+    if "choices" not in data:
+        return [query]
+    text = data["choices"][0]["message"]["content"]
+    variants = [line.strip() for line in text.split("\n") if line.strip()]
+    return [query] + variants
+
+
+def retrieve_multi_query(query, top_k=3):
+    variants = rewrite_query(query)
+    all_results = {}
+    for v in variants:
+        results = retrieve(v, top_k=top_k)
+        for r in results:
+            if r["text"] not in all_results or r["score"] > all_results[r["text"]]["score"]:
+                all_results[r["text"]] = r
+    sorted_results = sorted(all_results.values(), key=lambda x: x["score"], reverse=True)
+    return sorted_results[:top_k]

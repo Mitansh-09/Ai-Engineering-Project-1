@@ -2,4 +2,11 @@ fastapi
 uvicorn
 numpy
 requests
-python-dotenv
+python-dotenvlangchain==1.4.7
+langchain-core==1.7.0
+langchain-protocol==0.0.20
+langgraph==1.2.18
+langgraph-checkpoint==4.3.1
+langgraph-prebuilt==1.1.1
+langgraph-sdk==0.4.10
+langsmith==0.14.13

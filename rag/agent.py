@@ -13,6 +13,7 @@ class AgentState(TypedDict):
     question: str
     answer: str
     needs_notes: bool
+    history: list
 
 def classify_node(state: AgentState):
     prompt = f"""You have a knowledge base of personal study notes covering: FastAPI, LLM APIs, tool calling, agents, RAG (chunking/embeddings/retrieval), and deployment.
@@ -34,21 +35,28 @@ Question: {state['question']}"""
 
 def rag_node(state: AgentState):
     result = generate_answer(state["question"])
-    print("\n=== RETRIEVED CONTEXT (what the model SHOULD have used) ===")
-    for s in result["sources"]:
-        print(f"score={s['score']:.3f} | {s['text'][:200]}")
-    print("=== END CONTEXT ===\n")
-    return {"answer": result["answer"]}
+    new_history = state.get("history", []) + [
+        {"role": "user", "content": state["question"]},
+        {"role": "assistant", "content": result["answer"]}
+    ]
+    return {"answer": result["answer"], "history": new_history}
 
 def general_node(state: AgentState):
+    history = state.get("history", [])
+    messages = history + [{"role": "user", "content": state["question"]}]
+
     response = requests.post(
         url="https://openrouter.ai/api/v1/chat/completions",
         headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
-        json={"model": "openrouter/free", "messages": [{"role": "user", "content": state["question"]}]}
+        json={"model": "openrouter/free", "messages": messages}
     )
     data = response.json()
     answer = data.get("choices", [{}])[0].get("message", {}).get("content", "ERROR")
-    return {"answer": answer}
+    new_history = history + [
+        {"role": "user", "content": state["question"]},
+        {"role": "assistant", "content": answer}
+    ]
+    return {"answer": answer, "history": new_history}
 
 def route(state: AgentState):
     decision = "rag" if state["needs_notes"] else "general"
@@ -68,8 +76,10 @@ graph.add_edge("general", END)
 app = graph.compile()
 
 if __name__ == "__main__":
-    q1 = app.invoke({"question": "What does tool calling let the model do?"})
-    print("Q1 (should use notes):", q1["answer"])
+    state = {"question": "What is the capital of France?", "history": []}
+    state = app.invoke(state)
+    print("A1:", state["answer"])
 
-    q2 = app.invoke({"question": "What is the capital of France?"})
-    print("\nQ2 (should use general knowledge):", q2["answer"])
+    state["question"] = "What is its population?"
+    state = app.invoke(state)
+    print("A2:", state["answer"])

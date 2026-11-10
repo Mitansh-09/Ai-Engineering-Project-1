@@ -100,3 +100,29 @@ def retrieve_multi_query(query, top_k=3):
                 all_results[r["text"]] = r
     sorted_results = sorted(all_results.values(), key=lambda x: x["score"], reverse=True)
     return sorted_results[:top_k]
+
+
+def reformulate_query(question, history):
+    if not history:
+        return question  # no history, nothing to reformulate
+
+    history_text = "\n".join([f"{h['role']}: {h['content']}" for h in history[-4:]])
+
+    prompt = f"""Given this conversation history, rewrite the follow-up question as a standalone question that includes all necessary context. Return ONLY the rewritten question, nothing else.
+
+History:
+{history_text}
+
+Follow-up question: {question}
+
+Standalone question:"""
+
+    response = requests.post(
+        url="https://openrouter.ai/api/v1/chat/completions",
+        headers={"Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"},
+        json={"model": "openrouter/free", "messages": [{"role": "user", "content": prompt}]}
+    )
+    data = response.json()
+    if "choices" not in data:
+        return question
+    return data["choices"][0]["message"]["content"].strip()

@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, END
 from typing import TypedDict
-from rag.engine import generate_answer, load_knowledge_base
+from rag.engine import generate_answer, load_knowledge_base, reformulate_query
 import requests
 import os
 
@@ -16,9 +16,15 @@ class AgentState(TypedDict):
     history: list
 
 def classify_node(state: AgentState):
+    history = state.get("history", [])
+    history_text = "\n".join([f"{h['role']}: {h['content']}" for h in history[-4:]]) if history else "No prior conversation."
+
     prompt = f"""You have a knowledge base of personal study notes covering: FastAPI, LLM APIs, tool calling, agents, RAG (chunking/embeddings/retrieval), and deployment.
 
-Does this question relate to any of those specific topics (answer "notes"), or is it unrelated general knowledge like geography, history, etc. (answer "general")?
+Conversation so far:
+{history_text}
+
+Does this question (possibly a follow-up to the conversation above) relate to any of those specific topics (answer "notes"), or is it unrelated general knowledge like geography, history, etc. (answer "general")?
 
 Reply with ONLY one word: "notes" or "general".
 
@@ -34,8 +40,10 @@ Question: {state['question']}"""
     return {"needs_notes": "notes" in decision}
 
 def rag_node(state: AgentState):
-    result = generate_answer(state["question"])
-    new_history = state.get("history", []) + [
+    history = state.get("history", [])
+    standalone_question = reformulate_query(state["question"], history)
+    result = generate_answer(standalone_question)
+    new_history = history + [
         {"role": "user", "content": state["question"]},
         {"role": "assistant", "content": result["answer"]}
     ]
@@ -59,9 +67,7 @@ def general_node(state: AgentState):
     return {"answer": answer, "history": new_history}
 
 def route(state: AgentState):
-    decision = "rag" if state["needs_notes"] else "general"
-    print(f"\n>>> ROUTING DECISION: {decision} <<<\n")
-    return decision
+    return "rag" if state["needs_notes"] else "general"
 
 graph = StateGraph(AgentState)
 graph.add_node("classify", classify_node)
@@ -76,10 +82,10 @@ graph.add_edge("general", END)
 app = graph.compile()
 
 if __name__ == "__main__":
-    state = {"question": "What is the capital of France?", "history": []}
+    state = {"question": "What does tool calling let the model do?", "history": []}
     state = app.invoke(state)
     print("A1:", state["answer"])
 
-    state["question"] = "What is its population?"
+    state["question"] = "Give me an example of that"
     state = app.invoke(state)
-    print("A2:", state["answer"])
+    print("\nA2:", state["answer"])

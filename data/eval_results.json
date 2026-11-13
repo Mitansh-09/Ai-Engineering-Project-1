@@ -1,0 +1,122 @@
+[
+  {
+    "question": "What does the --reload flag do in uvicorn?",
+    "expected": "Restarts the server automatically when code changes, useful during development",
+    "actual": "The `--reload` flag restarts the server automatically when code changes, useful during development.",
+    "top_score": 0.5182000563143756
+  },
+  {
+    "question": "What is FastAPI built on top of?",
+    "expected": "Starlette and Pydantic",
+    "actual": "FastAPI is built on top of Starlette and Pydantic.",
+    "top_score": 0.5219275012489266
+  },
+  {
+    "question": "What happens if someone passes text instead of a number to a path parameter typed as int?",
+    "expected": "FastAPI automatically returns a validation error",
+    "actual": "FastAPI returns an error automatically. Per the context, it converts `item_id` to an integer and validates it, so passing text instead of a number triggers an automatic error response rather than reaching your function.",
+    "top_score": 0.345172768924087
+  },
+  {
+    "question": "What does a POST request do compared to PUT and DELETE?",
+    "expected": "POST creates a new resource, PUT updates/replaces an existing resource, DELETE removes a resource",
+    "actual": "According to the context:\n\n- **POST** creates a new resource\n- **PUT** updates/replaces an existing resource completely\n- **DELETE** removes a resource",
+    "top_score": 0.41950585047654876
+  },
+  {
+    "question": "Does the LLM remember past messages automatically between API calls?",
+    "expected": "No, every call is independent. You must resend the full message history to have a conversation.",
+    "actual": "No, the model does not remember past messages automatically. The context states: \"The model does not remember past messages on its own \u2014 every call is independent. To have a conversation, you must resend the full message history each time.\"",
+    "top_score": 0.445724986721519
+  },
+  {
+    "question": "What is a weakness of asking an LLM for structured JSON output?",
+    "expected": "The model can add extra text around the JSON or return invalid JSON, so you need error handling",
+    "actual": "The model can sometimes add extra text around the JSON, or return invalid JSON if the question is ambiguous.",
+    "top_score": 0.44403720532089075
+  },
+  {
+    "question": "Does the LLM itself execute the function during tool calling?",
+    "expected": "No, the model only decides when and with what arguments to call a tool. The developer's code runs the actual function.",
+    "actual": "\n\nNo. According to the context, \"The developer's code runs the real function using those arguments,\" while the model only returns a `tool_use` block with the function name and arguments. The context also states that \"The model never directly touches the real world.\"",
+    "top_score": 0.43914296154856486
+  },
+  {
+    "question": "What is an agent, according to the notes?",
+    "expected": "An LLM that can repeatedly call tools, read their results, and decide the next action instead of just answering once",
+    "actual": "According to the notes, an agent is basically an LLM that can repeatedly call tools, read their results, and decide the next action, instead of just answering once.",
+    "top_score": 0.3480132447661081
+  },
+  {
+    "question": "What is the purpose of overlap in chunking?",
+    "expected": "So that information near the boundary of one chunk isn't lost, it appears partially in both chunks",
+    "actual": "\n\nThe overlap exists so that information near the boundary of one chunk is not lost \u2014 it appears partially in both the current and next chunk.",
+    "top_score": 0.5448265811386105
+  },
+  {
+    "question": "What model was used to generate embeddings?",
+    "expected": "all-MiniLM-L6-v2 from sentence-transformers, producing 384-number vectors",
+    "actual": "{\"answer\": \"all-MiniLM-L6-v2\"}",
+    "top_score": 0.41080897779835907
+  },
+  {
+    "question": "What does a cosine similarity score close to 1 mean?",
+    "expected": "Very similar meaning between the two vectors",
+    "actual": "A score close to 1 means very similar meaning.",
+    "top_score": 0.5908064204458037
+  },
+  {
+    "question": "Why can embeddings find relevant text even when the wording is different from the question?",
+    "expected": "Embeddings capture meaning, not exact words, unlike keyword search like Ctrl+F",
+    "actual": "Embeddings convert text into vectors that represent meaning, so similar meanings produce similar vectors; this lets the system match a question\u2019s meaning to a chunk\u2019s meaning even when the exact words differ.",
+    "top_score": 0.5304790516265483
+  },
+  {
+    "question": "What are the two stages of RAG?",
+    "expected": "Indexing stage (done once: chunk, embed, store) and retrieval stage (done per question: embed query, compare, return top matches)",
+    "actual": "According to the \u201cKey takeaway\u201d at the beginning of the context:\n\n- **Indexing stage** \u2013 done once: chunk documents, convert to embeddings, store them.  \n- **Retrieval stage** \u2013 done per question: convert the question to an embedding, compare against stored chunk embeddings, return the top matches.  \n\nThese two stages make up RAG.",
+    "top_score": 0.5032309427531274
+  },
+  {
+    "question": "Why is the knowledge base loaded once at FastAPI startup instead of per request?",
+    "expected": "Because loading the embedding model and encoding chunks is slow, so doing it once avoids repeating that work on every request",
+    "actual": "According to the context, the knowledge base is loaded once at FastAPI startup because \"loading the embedding model and encoding chunks is slow, so doing it once avoids redoing that work on every API call.\"",
+    "top_score": 0.5938832236107154
+  },
+  {
+    "question": "What do the sources in the API response let the caller see?",
+    "expected": "Why the model gave that answer, which chunks were used and their similarity scores",
+    "actual": "The sources in the API response let the caller see the retrieved document chunks along with their similarity scores, which are ranked by relevance (e.g., scores of 0.63, 0.62, 0.50).",
+    "top_score": 0.44261434862423477
+  },
+  {
+    "question": "Why did deployment run out of memory on Render's free tier?",
+    "expected": "sentence-transformers plus torch and transformers needs gigabytes of memory, more than the 512MB free tier limit",
+    "actual": "Render\u2019s 512MB free tier couldn\u2019t hold torch + transformers + the model.",
+    "top_score": 0.5546119059448134
+  },
+  {
+    "question": "What is the free tier memory limit on Render?",
+    "expected": "512MB",
+    "actual": "\n\nThe free tier memory limit on Render is 512MB.",
+    "top_score": 0.44217471039563633
+  },
+  {
+    "question": "What permission did the HuggingFace token need that it was missing?",
+    "expected": "Make calls to Inference Providers",
+    "actual": "\"Make calls to Inference Providers\" (HuggingFace, n.d.)",
+    "top_score": 0.44253530111781214
+  },
+  {
+    "question": "Why did OpenRouter embeddings fail?",
+    "expected": "Insufficient credits, OpenRouter embeddings are not free even though some chat models are",
+    "actual": "OpenRouter doesn't offer free embeddings (only free chat models), which resulted in a 402 credit error.",
+    "top_score": 0.5901125255631172
+  },
+  {
+    "question": "What is the new HuggingFace inference URL structure after the old one was retired?",
+    "expected": "router.huggingface.co/hf-inference/models/{model}/pipeline/feature-extraction",
+    "actual": "`router.huggingface.co/hf-inference/models/{model}/pipeline/feature-extraction`\n\nThis replaces the retired `api-inference.huggingface.co` URL. Note the context also mentions that calling it requires a token with the \"Make calls to Inference Providers\" permission \u2014 without that scope you get a 403.",
+    "top_score": 0.4665267646722491
+  }
+]

@@ -11,6 +11,8 @@ A Retrieval-Augmented Generation API that answers questions using your own docum
 - Generates answers using an LLM, constrained to only use retrieved context
 - Returns both the answer and its sources (with similarity scores)
 - Correctly says "I don't know" when the answer isn't in the knowledge base
+- Routes questions between a RAG pipeline and general LLM knowledge using a LangGraph agent
+- Supports multi-turn conversations with follow-up question reformulation
 
 ## Stack
 - FastAPI (API layer)

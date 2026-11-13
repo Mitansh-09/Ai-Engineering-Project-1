@@ -79,3 +79,15 @@ that doesn't need retrieval at all.
 3. Swap the free LLM router for a fixed, paid model to get consistent,
    reliable answers instead of three different failure modes depending
    on luck.
+   
+   ## Agent capabilities (added Day 10-14)
+- Conditional routing: classifies each question as notes-based or
+  general knowledge, routes accordingly via LangGraph
+- Multi-turn conversation: tracks history across turns
+- Query reformulation: rewrites ambiguous follow-ups into standalone
+  questions using conversation history, before retrieval
+
+## Additional bugs fixed
+4. Agent routing ignored conversation context — classify_node only
+   saw the current question, so follow-ups got misrouted. Fixed by
+   passing history into the classification prompt too.
